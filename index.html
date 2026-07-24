@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Moment of Reflection</title>
+    <style>
+        :root {
+            --kraft-bg: #f4ebd0; /* Kraft paper yellow base */
+            --kraft-dark: #e6dac3;
+            --text-main: #4a3f35;
+            --text-muted: #7a6c5d;
+            --green-light: #a8e063;
+            --green-dark: #56ab2f;
+            --gradient-green: linear-gradient(135deg, var(--green-light) 0%, var(--green-dark) 100%);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', 'Inter', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background-color: var(--kraft-bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .card-container {
+            position: relative;
+            z-index: 10;
+            /* Removed background, borders, and shadows */
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 650px;
+            text-align: center;
+            box-sizing: border-box;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .page-top-decoration {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0.9;
+        }
+
+        .page-bottom-decoration {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            opacity: 0.8;
+        }
+
+        .footer-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-style: italic;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 16px;
+            color: var(--text-main);
+            resize: none;
+            box-sizing: border-box;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02) inset;
+        }
+
+        textarea:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 2px rgba(168, 224, 99, 0.4);
+        }
+
+        textarea::placeholder {
+            color: rgba(122, 108, 93, 0.5);
+        }
+
+        .btn {
+            background: var(--gradient-green);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 20px rgba(86, 171, 47, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(86, 171, 47, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            height: 14px;
+        }
+
+        .verse-box {
+            /* Removed background and border-radius */
+            margin-bottom: 35px;
+            text-align: left;
+        }
+
+        .verse-text {
+            font-size: 18px;
+            line-height: 1.7;
+            color: var(--text-main);
+            font-style: italic;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .verse-ref {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--green-dark);
+            display: block;
+            text-align: right;
+        }
+
+        /* View switching logic */
+        #view-input, #view-response {
+            transition: opacity 0.4s ease;
+        }
+        
+        #view-response {
+            display: none;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="page-top-decoration">
+        <svg width="100%" style="max-width: 900px;" height="120" viewBox="0 0 900 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Spring Vines extending far -->
+            <path d="M -50 60 Q 150 10 300 50 T 600 40 T 950 70" stroke="#87a96b" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <path d="M 50 90 Q 250 30 450 70 T 850 50" stroke="#a8e063" stroke-width="1" stroke-linecap="round" fill="none"/>
+            
+            <!-- Leaves Left to Right -->
+            <path d="M 100 45 Q 110 35 120 40 Q 110 50 100 45 Z" fill="#a8e063"/>
+            <path d="M 140 35 Q 135 23 125 28 Q 130 38 140 35 Z" fill="#56ab2f"/>
+            <path d="M 220 50 Q 235 40 245 47 Q 230 57 220 50 Z" fill="#a8e063"/>
+            <path d="M 350 48 Q 360 38 370 45 Q 355 55 350 48 Z" fill="#56ab2f"/>
+            <path d="M 420 62 Q 410 50 400 55 Q 410 65 420 62 Z" fill="#a8e063"/>
+            <path d="M 580 43 Q 590 33 600 40 Q 585 50 580 43 Z" fill="#56ab2f"/>
+            <path d="M 720 55 Q 735 45 745 52 Q 730 62 720 55 Z" fill="#a8e063"/>
+            <path d="M 800 58 Q 790 48 780 53 Q 790 63 800 58 Z" fill="#56ab2f"/>
+
+            <!-- Daisies -->
+            <g transform="translate(80, 65) scale(0.8)">
+                <g stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+                    <line x1="-9" y1="0" x2="9" y2="0"/><line x1="0" y1="-9" x2="0" y2="9"/><line x1="-6.3" y1="-6.3" x2="6.3" y2="6.3"/><line x1="-6.3" y1="6.3" x2="6.3" y2="-6.3"/>
+                </g>
+                <circle cx="0" cy="0" r="3.5" fill="#ffca28"/>
+            </g>
+            <g transform="translate(260, 40) scale(1)">
+                <g stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+                    <line x1="-9" y1="0" x2="9" y2="0"/><line x1="0" y1="-9" x2="0" y2="9"/><line x1="-6.3" y1="-6.3" x2="6.3" y2="6.3"/><line x1="-6.3" y1="6.3" x2="6.3" y2="-6.3"/>
+                </g>
+                <circle cx="0" cy="0" r="3.5" fill="#ffca28"/>
+            </g>
+            <g transform="translate(480, 58) scale(0.9)">
+                <g stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+                    <line x1="-9" y1="0" x2="9" y2="0"/><line x1="0" y1="-9" x2="0" y2="9"/><line x1="-6.3" y1="-6.3" x2="6.3" y2="6.3"/><line x1="-6.3" y1="6.3" x2="6.3" y2="-6.3"/>
+                </g>
+                <circle cx="0" cy="0" r="3.5" fill="#ffca28"/>
+            </g>
+            <g transform="translate(760, 48) scale(0.7)">
+                <g stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+                    <line x1="-9" y1="0" x2="9" y2="0"/><line x1="0" y1="-9" x2="0" y2="9"/><line x1="-6.3" y1="-6.3" x2="6.3" y2="6.3"/><line x1="-6.3" y1="6.3" x2="6.3" y2="-6.3"/>
+                </g>
+                <circle cx="0" cy="0" r="3.5" fill="#ffca28"/>
+            </g>
+
+            <!-- Daffodils -->
+            <g transform="translate(170, 30) scale(1.1)">
+                <g fill="#ffee58">
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(0)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(60)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(120)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(180)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(240)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(300)"/>
+                </g>
+                <ellipse cx="0" cy="0" rx="5" ry="4" fill="#ffca28" stroke="#ffb300" stroke-width="1"/>
+                <path d="M -3 1 Q 0 3 3 1" stroke="#d48806" stroke-width="0.8" fill="none"/>
+            </g>
+            
+            <g transform="translate(360, 50) scale(0.85)">
+                <g fill="#ffee58">
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(10)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(70)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(130)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(190)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(250)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(310)"/>
+                </g>
+                <ellipse cx="0" cy="0" rx="5" ry="4" fill="#ffca28" stroke="#ffb300" stroke-width="1"/>
+                <path d="M -3 1 Q 0 3 3 1" stroke="#d48806" stroke-width="0.8" fill="none"/>
+            </g>
+
+            <g transform="translate(640, 35) scale(1.2)">
+                <g fill="#ffee58">
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(-15)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(45)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(105)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(165)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(225)"/>
+                    <path d="M0,0 C5,-12 8,-12 0,-18 C-8,-12 -5,-12 0,0" transform="rotate(285)"/>
+                </g>
+                <ellipse cx="0" cy="0" rx="5" ry="4" fill="#ffca28" stroke="#ffb300" stroke-width="1"/>
+                <path d="M -3 1 Q 0 3 3 1" stroke="#d48806" stroke-width="0.8" fill="none"/>
+            </g>
+        </svg>
+    </div>
+
+    <div class="card-container" id="main-card">
+        
+        <!-- View 1: User Input -->
+        <div id="view-input">
+            <h1>A Moment of Reflection</h1>
+            <p class="subtitle">Leave your worries, doubts, or heavy thoughts here.</p>
+            
+            <textarea id="worry-input" placeholder="What is burdening your heart today?"></textarea>
+            
+            <button class="btn" id="pray-btn">Pray</button>
+            <div class="error-msg" id="error-msg">Please share your thoughts before proceeding.</div>
+        </div>
+
+        <!-- View 2: Response -->
+        <div id="view-response">
+            <h1>Words of Comfort</h1>
+            <p class="subtitle">A timeless message of peace for your journey.</p>
+            
+            <div class="verse-box">
+                <span class="verse-text" id="verse-text"></span>
+                <span class="verse-ref" id="verse-ref"></span>
+            </div>
+            
+            <button class="btn" id="return-btn">Return</button>
+        </div>
+
+    </div>
+
+    <div class="page-bottom-decoration">
+        <svg width="300" height="40" viewBox="0 0 300 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Growing grass blades at the bottom -->
+            <path d="M 80 40 Q 90 20 100 15 Q 105 25 100 40" fill="#a8e063" opacity="0.6"/>
+            <path d="M 110 40 Q 120 30 130 25 Q 135 35 125 40" fill="#56ab2f" opacity="0.5"/>
+            <path d="M 190 40 Q 200 25 210 15 Q 215 30 205 40" fill="#a8e063" opacity="0.6"/>
+            <path d="M 175 40 Q 180 35 190 30 Q 195 40 185 40" fill="#56ab2f" opacity="0.5"/>
+            
+            <!-- A single fallen daisy -->
+            <g transform="translate(150, 28) scale(0.6)">
+                <g stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+                    <line x1="-9" y1="0" x2="9" y2="0"/><line x1="0" y1="-9" x2="0" y2="9"/><line x1="-6.3" y1="-6.3" x2="6.3" y2="6.3"/><line x1="-6.3" y1="6.3" x2="6.3" y2="-6.3"/>
+                </g>
+                <circle cx="0" cy="0" r="3.5" fill="#ffca28"/>
+            </g>
+        </svg>
+        <div class="footer-text">Breathe in peace, exhale your worries.</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2 + 1;
+                this.speedY = Math.random() * 0.5 + 0.1; // Gentle float upwards
+                this.alpha = Math.random() * 0.5 + 0.1;
+                // Green and soft white tones
+                const colors = ['#ffffff', '#a8e063', '#56ab2f', '#d5c9a6'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.sinValue = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                this.y -= this.speedY;
+                this.sinValue += 0.02;
+                this.x += Math.sin(this.sinValue) * 0.5; // Gentle sway
+
+                if (this.y < -10) {
+                    this.y = height + 10;
+                    this.x = Math.random() * width;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.alpha;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const particleCount = window.innerWidth < 768 ? 30 : 60; // Fewer on mobile
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateCanvas() {
+            // Draw a very slight fade for trailing effect, matching the kraft background
+            ctx.fillStyle = 'rgba(244, 235, 208, 0.3)'; 
+            ctx.fillRect(0, 0, width, height);
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        const verses = [
+            { text: "Come to me, all you who are weary and burdened, and I will give you rest.", ref: "Matthew 11:28" },
+            { text: "Cast all your anxiety on him because he cares for you.", ref: "1 Peter 5:7" },
+            { text: "Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid.", ref: "John 14:27" },
+            { text: "Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.", ref: "Joshua 1:9" },
+            { text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future.", ref: "Jeremiah 29:11" },
+            { text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.", ref: "Psalm 34:18" },
+            { text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", ref: "Philippians 4:6" },
+            { text: "The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul.", ref: "Psalm 23:1-3" },
+            { text: "God is our refuge and strength, an ever-present help in trouble. Therefore we will not fear, though the earth give way and the mountains fall into the heart of the sea.", ref: "Psalm 46:1-2" },
+            { text: "When anxiety was great within me, your consolation brought me joy.", ref: "Psalm 94:19" },
+            { text: "Therefore do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own.", ref: "Matthew 6:34" },
+            { text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint.", ref: "Isaiah 40:31" },
+            { text: "I have told you these things, so that in me you may have peace. In this world you will have trouble. But take heart! I have overcome the world.", ref: "John 16:33" },
+            { text: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.", ref: "Proverbs 3:5-6" },
+            { text: "You will keep in perfect peace those whose minds are steadfast, because they trust in you.", ref: "Isaiah 26:3" },
+            { text: "Because of the Lord’s great love we are not consumed, for his compassions never fail. They are new every morning; great is your faithfulness.", ref: "Lamentations 3:22-23" },
+            { text: "The Lord bless you and keep you; the Lord make his face shine on you and be gracious to you; the Lord turn his face toward you and give you peace.", ref: "Numbers 6:24-26" },
+            { text: "Let the morning bring me word of your unfailing love, for I have put my trust in you. Show me the way I should go, for to you I entrust my life.", ref: "Psalm 143:8" }
+        ];
+
+        // DOM Elements
+        const viewInput = document.getElementById('view-input');
+        const viewResponse = document.getElementById('view-response');
+        const inputField = document.getElementById('worry-input');
+        const prayBtn = document.getElementById('pray-btn');
+        const returnBtn = document.getElementById('return-btn');
+        const errorMsg = document.getElementById('error-msg');
+        const verseText = document.getElementById('verse-text');
+        const verseRef = document.getElementById('verse-ref');
+        const mainCard = document.getElementById('main-card');
+
+        function fadeTransition(hideElement, showElement, callback) {
+            // Fade out current element
+            hideElement.style.opacity = 0;
+            
+            setTimeout(() => {
+                hideElement.style.display = 'none';
+                showElement.style.display = 'block';
+                
+                // Execute logical update (like picking a verse) before fading in
+                if(callback) callback();
+                
+                // Small delay to allow display:block to render before fading in
+                setTimeout(() => {
+                    showElement.style.opacity = 1;
+                }, 50);
+            }, 400); // Matches CSS transition time
+        }
+
+        prayBtn.addEventListener('click', () => {
+            const text = inputField.value.trim();
+            
+            if (text === "") {
+                errorMsg.style.opacity = 1;
+                setTimeout(() => { errorMsg.style.opacity = 0; }, 3000);
+                return;
+            }
+
+            errorMsg.style.opacity = 0;
+
+            fadeTransition(viewInput, viewResponse, () => {
+                // Select random comforting text
+                const randomIndex = Math.floor(Math.random() * verses.length);
+                const selectedVerse = verses[randomIndex];
+
+                // Update UI
+                verseText.textContent = `"${selectedVerse.text}"`;
+                verseRef.textContent = `- ${selectedVerse.ref}`;
+            });
+        });
+
+        returnBtn.addEventListener('click', () => {
+            fadeTransition(viewResponse, viewInput, () => {
+                // Clear the input area for a fresh start
+                inputField.value = '';
+            });
+        });
+
+    </script>
+</body>
+</html>
